@@ -8,4 +8,6 @@ urlpatterns = [
 
     re_path(r'^authors/$', views.AuthorListView.as_view(), name='authors'),
     re_path(r'^author/(?P<pk>\d+)$', views.AuthorDetailView.as_view(), name='author-detail'),
+    re_path('mybooks/', views.LoanedBooksByUserListView.as_view(), name='my-borrowed'),
+    re_path('borrowed/', views.BorrowedAllBooksView.as_view(), name='all-borrowed'),
 ]
