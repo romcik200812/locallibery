@@ -84,6 +84,25 @@ class BorrowedAllBooksView(PermissionRequiredMixin, generic.ListView):
             status='o'
         ).order_by('due_back')
 
+class GenreListView(generic.ListView):
+    model = Genre
+    paginate_by = 12
+
+class GenreDetailView(generic.DetailView):
+    model = Genre
+
+class LanguageListView(generic.ListView):
+    model = Language
+    paginate_by = 12
+
+class LanguageDetailView(generic.DetailView):
+    model = Language
+
+class BookInstanceListView(generic.ListView):
+    model = BookInstance
+    paginate_by = 10
+
+
 import datetime
 
 from django.contrib.auth.decorators import login_required, permission_required
@@ -125,3 +144,123 @@ def renew_book_librarian(request, pk):
     }
 
     return render(request, 'catalog/book_renew_librarian.html', context)
+
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.db.models import RestrictedError
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from .models import Author
+
+class AuthorCreate(PermissionRequiredMixin, CreateView):
+    model = Author
+    fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
+    initial = {'date_of_death': datetime.date(2023, 11, 11)}
+    permission_required = 'catalog.add_author'
+
+class AuthorUpdate(PermissionRequiredMixin, UpdateView):
+    model = Author
+    # Not recommended (potential security issue if more fields added)
+    fields = '__all__'
+    permission_required = 'catalog.change_author'
+
+class AuthorDelete(PermissionRequiredMixin, DeleteView):
+    model = Author
+    success_url = reverse_lazy('authors')
+    permission_required = 'catalog.delete_author'
+
+    def form_valid(self, form):
+        try:
+            self.object.delete()
+            return HttpResponseRedirect(self.success_url)
+        except RestrictedError:
+            return HttpResponseRedirect(
+                reverse("author-delete", kwargs={"pk": self.object.pk})
+            )
+
+from django.db.models import ProtectedError
+from .models import Genre, Language, Book, BookInstance
+
+
+class GenreCreate(PermissionRequiredMixin, CreateView):
+    model = Genre
+    fields = ['name']
+    permission_required = 'catalog.add_genre'
+
+class GenreUpdate(PermissionRequiredMixin, UpdateView):
+    model = Genre
+    fields = ['name']
+    permission_required = 'catalog.change_genre'
+
+class GenreDelete(PermissionRequiredMixin, DeleteView):
+    model = Genre
+    success_url = reverse_lazy('genres')
+    permission_required = 'catalog.delete_genre'
+
+    def form_valid(self, form):
+        try:
+            self.object.delete()
+            return HttpResponseRedirect(self.success_url)
+        except ProtectedError:
+            return HttpResponseRedirect(reverse("genre-delete", kwargs={"pk": self.object.pk}))
+
+
+class LanguageCreate(PermissionRequiredMixin, CreateView):
+    model = Language
+    fields = ['name']
+    permission_required = 'catalog.add_language'
+
+class LanguageUpdate(PermissionRequiredMixin, UpdateView):
+    model = Language
+    fields = ['name']
+    permission_required = 'catalog.change_language'
+
+class LanguageDelete(PermissionRequiredMixin, DeleteView):
+    model = Language
+    success_url = reverse_lazy('languages')
+    permission_required = 'catalog.delete_language'
+
+    def form_valid(self, form):
+        try:
+            self.object.delete()
+            return HttpResponseRedirect(self.success_url)
+        except ProtectedError:
+            return HttpResponseRedirect(reverse("language-delete", kwargs={"pk": self.object.pk}))
+
+
+class BookCreate(PermissionRequiredMixin, CreateView):
+    model = Book
+    fields = ['title', 'author', 'summary', 'isbn', 'genre', 'language']
+    permission_required = 'catalog.add_book'
+
+class BookUpdate(PermissionRequiredMixin, UpdateView):
+    model = Book
+    fields = ['title', 'author', 'summary', 'isbn', 'genre', 'language']
+    permission_required = 'catalog.change_book'
+
+class BookDelete(PermissionRequiredMixin, DeleteView):
+    model = Book
+    success_url = reverse_lazy('books')
+    permission_required = 'catalog.delete_book'
+
+    def form_valid(self, form):
+        try:
+            self.object.delete()
+            return HttpResponseRedirect(self.success_url)
+        except ProtectedError:
+            return HttpResponseRedirect(reverse("book-delete", kwargs={"pk": self.object.pk}))
+
+
+class BookInstanceCreate(PermissionRequiredMixin, CreateView):
+    model = BookInstance
+    fields = ['book', 'imprint', 'due_back', 'status', 'borrower']
+    permission_required = 'catalog.add_bookinstance'
+
+class BookInstanceUpdate(PermissionRequiredMixin, UpdateView):
+    model = BookInstance
+    fields = ['book', 'imprint', 'due_back', 'status', 'borrower']
+    permission_required = 'catalog.change_bookinstance'
+
+class BookInstanceDelete(PermissionRequiredMixin, DeleteView):
+    model = BookInstance
+    success_url = reverse_lazy('bookinstances')
+    permission_required = 'catalog.delete_bookinstance'
