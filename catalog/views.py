@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
 # Create your views here.
-from .models import Book, Author, BookInstance, Genre
+from .models import Book, Author, BookInstance, Genre, Language
 
 def index(request):
     """
@@ -55,7 +55,7 @@ class BookDetailView(generic.DetailView):
 
 class AuthorListView(generic.ListView):
     model = Author
-    paginate_by = 10  # постраничный вывод (опционально)
+    paginate_by = 1  # постраничный вывод (опционально)
 
 
 class AuthorDetailView(generic.DetailView):
@@ -76,7 +76,7 @@ class BorrowedAllBooksView(PermissionRequiredMixin, generic.ListView):
     """Список всех взятых книг — только для библиотекарей."""
     permission_required = 'catalog.can_mark_returned'
     model = BookInstance
-    paginate_by = 10
+    paginate_by = 1
     template_name = 'catalog/borrowed_all.html'
 
     def get_queryset(self):
@@ -86,21 +86,21 @@ class BorrowedAllBooksView(PermissionRequiredMixin, generic.ListView):
 
 class GenreListView(generic.ListView):
     model = Genre
-    paginate_by = 12
+    paginate_by = 1
 
 class GenreDetailView(generic.DetailView):
     model = Genre
 
 class LanguageListView(generic.ListView):
     model = Language
-    paginate_by = 12
+    paginate_by = 1
 
 class LanguageDetailView(generic.DetailView):
     model = Language
 
 class BookInstanceListView(generic.ListView):
     model = BookInstance
-    paginate_by = 10
+    paginate_by = 1
 
 
 import datetime

@@ -1,0 +1,14 @@
+{% extends "base_generic.html" %}
+{% block content %}
+  <h1>Book Copies List</h1>
+  {% if bookinstance_list %}
+  <ul>
+    {% for inst in bookinstance_list %}
+      <li class="{% if inst.is_overdue %}text-danger{% endif %}">
+        <a href="{{ inst.book.get_absolute_url }}">{{ inst.book.title }}</a>
+        ({{ inst.id }}) - {{ inst.get_status_display }}
+      </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p>There are no book copies.</p>{% endif %}
+{% endblock %}
